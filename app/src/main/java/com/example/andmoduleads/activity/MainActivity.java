@@ -29,6 +29,7 @@ import com.ads.control.event.AperoAdjust;
 import com.ads.control.funtion.AdCallback;
 import com.ads.control.funtion.DialogExitListener;
 import com.ads.control.funtion.PurchaseListener;
+import com.example.andmoduleads.AdPreload;
 import com.example.andmoduleads.BuildConfig;
 import com.example.andmoduleads.R;
 import com.google.android.gms.ads.FullScreenContentCallback;
@@ -194,6 +195,33 @@ public class MainActivity extends AppCompatActivity {
                 });
                 dialog.show();
             }
+        });
+
+        findViewById(R.id.btnInterPreload).setOnClickListener(v -> {
+            AdPreload.getInstance().setAdIdInterPreload(
+                    BuildConfig.ads_inter_priority,
+                    BuildConfig.ad_interstitial_splash
+            );
+            AdPreload.getInstance().preloadInterSameTime(
+                    this,
+                    7000,
+                    3000,
+                    new AperoAdCallback(){
+                        @Override
+                        public void onNextAction() {
+                            super.onNextAction();
+                            Log.e("AdPreload", "onNextAction: ");
+                            startActivity(new Intent(MainActivity.this, SimpleListActivity.class));
+                        }
+
+                        @Override
+                        public void onAdClosed() {
+                            super.onAdClosed();
+                            Log.e("AdPreload", "onAdClosed: ");
+                            startActivity(new Intent(MainActivity.this, SimpleListActivity.class));
+                        }
+                    }
+            );
         });
 
     }

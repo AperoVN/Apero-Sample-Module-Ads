@@ -86,6 +86,14 @@
             android:layout_centerHorizontal="true"
             android:onClick="onTrackRevenueEventClick"
             android:text="Track Revenue adjust" />
+
+        <Button
+            android:id="@+id/btnInterPreload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/btnAdjustTrack"
+            android:layout_centerHorizontal="true"
+            android:text="Show inter preload" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 
     <com.ads.control.ads.bannerAds.AperoBannerAdView
