@@ -13,6 +13,7 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import com.ads.control.admob.Admob;
 import com.ads.control.admob.AppOpenManager;
 import com.ads.control.ads.wrapper.ApAdError;
+import com.ads.control.dialog.PrepareLoadingAdsDialog;
 import com.ads.control.event.AperoLogEventManager;
 import com.ads.control.funtion.AdCallback;
 import com.ads.control.funtion.AdType;
@@ -31,6 +32,7 @@ public class AdPreload {
     private static AdPreload instance;
     InterstitialAd interPreloadHigh;
     InterstitialAd interPreloadNormal;
+    private PrepareLoadingAdsDialog dialog;
 
     boolean isTimeDelayPreload = false; //xử lý delay time show ads, = true mới show ads
     private boolean isTimeoutPreload;
@@ -89,7 +91,6 @@ public class AdPreload {
                     });
                     if (isTimeDelayPreload) {
                         adListener.onAdSplashPriorityReady();
-                        Log.i(TAG, "loadSplashInterstitialAdsPriority:show ad on loaded ");
                     }
                 }
             }
@@ -148,6 +149,9 @@ public class AdPreload {
                 if (adListener != null) {
                     adListener.onAdClosed();
                 }
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
             }
 
             @Override
@@ -156,6 +160,9 @@ public class AdPreload {
                 interPreloadHigh = null;
                 if (adListener != null) {
                     adListener.onAdPriorityFailedToShow(new ApAdError(adError));
+                }
+                if (dialog != null) {
+                    dialog.dismiss();
                 }
             }
 
@@ -230,8 +237,7 @@ public class AdPreload {
                                         .getMediationAdapterClassName(), AdType.INTERSTITIAL);
                     });
                     if (isTimeDelayPreload) {
-                        adListener.onAdSplashPriorityReady();
-                        Log.i(TAG, "loadAdInterstitialNormal:show ad on loaded ");
+                        adListener.onAdSplashReady();
                     }
                 }
             }
@@ -290,6 +296,9 @@ public class AdPreload {
                 if (adListener != null) {
                     adListener.onAdClosed();
                 }
+                if (dialog != null) {
+                    dialog.dismiss();
+                }
             }
 
             @Override
@@ -298,6 +307,9 @@ public class AdPreload {
                 interPreloadNormal = null;
                 if (adListener != null) {
                     adListener.onAdPriorityFailedToShow(new ApAdError(adError));
+                }
+                if (dialog != null) {
+                    dialog.dismiss();
                 }
             }
 
@@ -370,18 +382,45 @@ public class AdPreload {
             }
         }
 
-        new Handler().postDelayed(() -> {
-            if (interPreloadHigh != null && !isAdPreloadShowed) {
-                Log.i(TAG, "loadSplashInterstitialAdsPriority:show ad on delay ");
-                onShowAdsInterPreloadPriority((AppCompatActivity) context,
-                        setShowAdInterPreloadPriorityCallBack(context, timeOut, timeDelay, adListener));
-                return;
-            } else if (interPreloadNormal != null && !isAdPreloadShowed) {
-                Log.i(TAG, "loadAdInterstitialNormal:show ad on delay ");
-                onShowAdsInterPreloadNormal((AppCompatActivity) context,
-                        setShowAdInterPreloadPriorityCallBack(context, timeOut, timeDelay, adListener));
-                return;
+        if (ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) {
+            AppCompatActivity activity = (AppCompatActivity)context;
+            try {
+                try {
+                    if (dialog != null && dialog.isShowing()) {
+                        dialog.dismiss();
+                    }
+                } catch (Exception e) {
+                    dialog = null;
+                    e.printStackTrace();
+                }
+                dialog = new PrepareLoadingAdsDialog(activity);
+                try {
+                    dialog.show();
+                } catch (Exception e) {
+                    adListener.onNextAction();
+                    return;
+                }
+            } catch (Exception e) {
+                dialog = null;
+                e.printStackTrace();
             }
+            new Handler().postDelayed(() -> {
+                if (activity.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) {
+                    new Handler().postDelayed(() -> {
+                        if (dialog != null && dialog.isShowing() && !activity.isDestroyed())
+                            dialog.dismiss();
+                    }, 2000);
+                } else {
+                    if (dialog != null && dialog.isShowing() && !activity.isDestroyed())
+                        dialog.dismiss();
+                }
+                checkAdReadyAndShow(context, timeOut, timeDelay, adListener);
+            }, 800);
+
+        }
+
+        new Handler().postDelayed(() -> {
+            checkAdReadyAndShow(context, timeOut, timeDelay, adListener);
             isTimeDelayPreload = true;
         }, timeDelay);
 
@@ -392,20 +431,26 @@ public class AdPreload {
                 public void run() {
                     Log.e(TAG, "run: da");
                     isTimeoutPreload = true;
-                    if (interPreloadHigh != null) {
-                        Log.i(TAG, "loadSplashInterstitialAdsPriority:show ad on timeout ");
-                        onShowAdsInterPreloadPriority((AppCompatActivity) context,
-                                setShowAdInterPreloadPriorityCallBack(context, timeOut, timeDelay, adListener));
-                    } else if (interPreloadNormal != null) {
-                        Log.i(TAG, "loadAdInterstitialNormal:show ad on timeout ");
-                        onShowAdsInterPreloadNormal((AppCompatActivity) context,
-                                setShowAdInterPreloadNormalCallBack(context, timeOut, timeDelay, adListener));
-                    } else {
+                    checkAdReadyAndShow(context, timeOut, timeDelay, adListener);
+                    if(!isAdPreloadShowed) {
                         adListener.onNextAction();
                     }
+
                 }
             };
             handlerTimeoutPreload.postDelayed(rdTimeoutPreload, timeOut);
+        }
+    }
+
+    private void checkAdReadyAndShow(Context context, long timeOut, long timeDelay, AperoAdCallback adListener){
+        if (interPreloadHigh != null && !isAdPreloadShowed) {
+            Log.i(TAG, "loadSplashInterstitialAdsPriority:show ad on delay ");
+            onShowAdsInterPreloadPriority((AppCompatActivity) context,
+                    setShowAdInterPreloadPriorityCallBack(context, timeOut, timeDelay, adListener));
+        } else if (interPreloadNormal != null && !isAdPreloadShowed) {
+            Log.i(TAG, "loadAdInterstitialNormal:show ad on delay ");
+            onShowAdsInterPreloadNormal((AppCompatActivity) context,
+                    setShowAdInterPreloadNormalCallBack(context, timeOut, timeDelay, adListener));
         }
     }
 
@@ -429,7 +474,7 @@ public class AdPreload {
             public void onAdSplashReady() {
                 super.onAdSplashReady();
                 adListener.onAdSplashReady();
-                Log.i(TAG, "onAdSplashReady: "+ isAdPreloadShowed);
+                Log.i(TAG, "onAdSplashReady: ");
                 if (!isAdPreloadShowed) {
                     onShowAdsInterPreloadNormal((AppCompatActivity) context,
                             setShowAdInterPreloadNormalCallBack(context, timeOut, timeDelay, adListener));
@@ -488,7 +533,7 @@ public class AdPreload {
                 Log.e(TAG, "onAdPriorityFailedToShow: ");
                 if (interPreloadNormal != null) {
                     onShowAdsInterPreloadNormal((AppCompatActivity) context,
-                            setShowAdInterPreloadPriorityCallBack(context, timeOut, timeDelay, adListener));
+                            setShowAdInterPreloadNormalCallBack(context, timeOut, timeDelay, adListener));
                 } else {
                     adListener.onNextAction();
                     if(handlerTimeoutPreload != null) {
@@ -530,7 +575,7 @@ public class AdPreload {
                 if (interPreloadHigh != null
                 ) {
                     onShowAdsInterPreloadPriority((AppCompatActivity) context,
-                            setLoadAdInterPreloadCallBack(context, timeOut, timeDelay, adListener));
+                            setShowAdInterPreloadPriorityCallBack(context, timeOut, timeDelay, adListener));
                 } else {
                     adListener.onNextAction();
                     if(handlerTimeoutPreload != null) {
