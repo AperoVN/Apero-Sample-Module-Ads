@@ -197,12 +197,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        AdPreload.getInstance().loadAdInterPreloadSametime(this,new AperoAdCallback());
         findViewById(R.id.btnInterPreload).setOnClickListener(v -> {
-            AdPreload.getInstance().setAdIdInterPreload(
-                    BuildConfig.ads_inter_priority,
-                    BuildConfig.ad_interstitial_splash
-            );
-            AdPreload.getInstance().preloadInterSameTime(
+            AdPreload.getInstance().showAdInterPreloadSametime(
                     this,
                     7000,
                     3000,

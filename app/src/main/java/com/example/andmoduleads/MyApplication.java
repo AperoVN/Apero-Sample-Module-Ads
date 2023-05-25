@@ -77,6 +77,10 @@ public class MyApplication extends AdsMultiDexApplication {
         // If true -> onNextAction() is called right after Ad Interstitial showed
         Admob.getInstance().setOpenActivityAfterShowInterAds(false);
 
+        AdPreload.getInstance().setAdIdInterPreload(
+                BuildConfig.ads_inter_priority,
+                BuildConfig.ad_interstitial_splash
+        );
     }
 
     private void initBilling() {
