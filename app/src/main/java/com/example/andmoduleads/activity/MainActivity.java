@@ -250,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
                 this,
                 BuildConfig.ads_inter_priority,
                 BuildConfig.ad_interstitial,
+                true,
                 new AperoAdCallback() {
                     @Override
                     public void onInterstitialLoad(@Nullable ApInterstitialAd interstitialAd) {
