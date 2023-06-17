@@ -757,7 +757,11 @@ Application
     @Override
     public void onCreate() {
         super.onCreate();
-        AppPurchase.getInstance().initBilling(this,listINAPId,listSubsId);
+        List<PurchaseItem> listPurchaseItem = new ArrayList<>();
+        listPurchaseItem.add(new PurchaseItem(Constants.PRODUCT_ID, AppPurchase.TYPE_IAP.PURCHASE));
+        listPurchaseItem.add(new PurchaseItem(Constants.ID_SUBS_WITH_FREE_TRIAL, "trial", AppPurchase.TYPE_IAP.SUBSCRIPTION));
+        listPurchaseItem.add(new PurchaseItem(Constants.ID_SUBS_WITHOUT_FREE_TRIAL, AppPurchase.TYPE_IAP.SUBSCRIPTION));
+        AppPurchase.getInstance().initBilling(this, listPurchaseItem);
     }
 ~~~
 ## Check status billing init
