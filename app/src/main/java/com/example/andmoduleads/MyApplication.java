@@ -1,6 +1,7 @@
 package com.example.andmoduleads;
 
 import com.ads.control.ads.AperoAd;
+import com.ads.control.billing.PurchaseItem;
 import com.ads.control.config.AdjustConfig;
 import com.ads.control.config.AperoAdConfig;
 import com.ads.control.application.AdsMultiDexApplication;
@@ -80,11 +81,11 @@ public class MyApplication extends AdsMultiDexApplication {
     }
 
     private void initBilling() {
-        List<String> listINAPId = new ArrayList<>();
-        listINAPId.add(MainActivity.PRODUCT_ID);
-        List<String> listSubsId = new ArrayList<>();
-
-        AppPurchase.getInstance().initBilling(getApplication(), listINAPId, listSubsId);
+        List<PurchaseItem> listPurchaseItem = new ArrayList<>();
+        listPurchaseItem.add(new PurchaseItem("PRODUCT_ID", AppPurchase.TYPE_IAP.PURCHASE));
+        listPurchaseItem.add(new PurchaseItem("ID_SUBS_WITH_FREE_TRIAL", "trial_id", AppPurchase.TYPE_IAP.SUBSCRIPTION));
+        listPurchaseItem.add(new PurchaseItem("ID_SUBS_WITHOUT_FREE_TRIAL", AppPurchase.TYPE_IAP.SUBSCRIPTION));
+        AppPurchase.getInstance().initBilling(this, listPurchaseItem);
     }
 
 }
