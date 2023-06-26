@@ -750,6 +750,45 @@ when hide app -> reopen app will be loaded forever, we will use this function in
   AperoAd.getInstance().onCheckShowedAppOpen3WhenFail(context, timeDelay, true, AperoAdCallback)
 ~~~
 
+### Ads Interstitial 3 
+Create variable
+~~~
+  private volatile ApInterstitialPriorityAd interstitialSametime3;
+  synchronized public ApInterstitialPriorityAd getInterstitialSametime3() {
+      if (interstitialSametime3 == null)
+          interstitialSametime3 = new ApInterstitialPriorityAd(
+                  id_priority,
+                  id_medium,
+                  id_normal
+            );
+      return interstitialFileSametime3;
+  }
+~~~
+
+Load sametime ad
+~~~
+  AperoAd.getInstance().loadPriorityInterstitialAds(
+                            myContext,
+                            interstitialSametime3,
+                            AperoAdCallback()
+                        )
+~~~
+
+Show ad
+~~~
+  AperoAd.getInstance().forceShowInterstitialPriority(
+                            myContext,
+                            interstitialSametime3,
+                            object : AperoAdCallback() {
+                                override fun onNextAction() {
+                                    super.onNextAction()
+                                    onNextAction()
+                                }
+                            },
+                            false
+                        )
+~~~
+
 # <a id="billing_app"></a>Billing app
 ## Init Billing
 Application
