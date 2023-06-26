@@ -765,6 +765,11 @@ Create variable
   }
 ~~~
 
+Set number of ad reloads when fail (Application) 
+~~~
+  aperoAdConfig.setNumberOfTimesReloadAds(numberLoadAd)
+~~~
+
 Load sametime ad
 ~~~
   AperoAd.getInstance().loadPriorityInterstitialAds(
