@@ -794,6 +794,107 @@ Show ad
                         )
 ~~~
 
+# <a id="reload_ad"></a>Reload Ad
+## Reload Ad Helper
+
+~~~
+dependencies {
+    version = "1.10.0-snapshot"
+    implementation 'apero-inhouse:apero-ads:$version'
+}
+~~~
+
+### Banner | Native
+
+### Class Change
+|    Banner      |      Native    |
+|----------------|----------------|
+| BannerAdConfig | NativeAdConfig |
+| BannerAdHelper | NativeAdHelper |
+| BannerAdParam  | NativeAdParam  |
+| AdBannerState  | AdNativeState  |
+| AdCallback     |AperoAdCallback |
+
+InitBannerAdHelper
+
+Khởi tạo banner helper
+~~~
+// canShowAds: có cho show ad hay không (remote config)
+// canReloadAds: có cho reload ad hay không (remote config)
+private fun initBannerAd(): BannerAdHelper {
+        val config = BannerAdConfig(
+            idAds = BuildConfig.ad_banner,
+            canShowAds = true,
+            canReloadAds = true,
+        )
+        return BannerAdHelper(activity = this, lifecycleOwner = this, config = config)
+    }
+~~~
+OnCreate()
+
+Set layout view sau khi khởi tạo binding thành công
+~~~
+//setTagForDebug: tag for tracking log reload
+override fun onCreate(savedInstanceState: Bundle?) {
+	bannerAdHelper.setBannerContentView(binding.frAds)
+	    .apply { setTagForDebug("BANNER=>>>") }
+}
+~~~
+
+RequestAd()
+
+Request 1 ad mới | banner visible
+~~~
+	bannerAdHelper.requestAds(BannerAdParam.Request)
+~~~
+
+Show 1 banner mới (preload) | banner visible
+~~~
+	bannerAdHelper.requestAds(BannerAdParam.Ready(adView))
+~~~
+
+Reload ad when clickable after milis | not working khi gọi hàm cancel() | active khi gọi lại Request or Ready
+~~~
+	bannerAdHelper.requestAds(BannerAdParam.Clickable(remoteAds.minimumTimeKeepAdsDisplay))
+~~~
+
+CancelAd()
+
+Huỷ tiến trình request ad và ẩn banner | banner gone
+~~~
+	bannerAdHelper.cancel()
+~~~
+User manual on/off reload
+
+Cho phép người dùng tắt bật reload thủ công | Hoạt động khi config.reload = true
+~~~
+	bannerAdHelper.flagUserEnableReload
+~~~
+Ad Callback
+~~~
+val adCallback = object : AdCallback() {
+                    override fun onAdClicked() {
+                        super.onAdClicked()
+                        Analytics.track("banner_click")
+                    }
+
+                    override fun onAdImpression() {
+                        super.onAdImpression()
+                        Analytics.track("banner_view")
+                    }
+                }
+~~~
+Register ad callback
+Đăng kí sự kiện gọi lại của banner
+~~~
+	bannerAdHelper.registerAdListener(adCallback)
+~~~
+
+Unregister ad callback
+Huỷ sự kiện gọi lại của banner
+~~~
+	bannerAdHelper.unregisterAdListener(adCallback)
+~~~
 # <a id="billing_app"></a>Billing app
 ## Init Billing
 Application
