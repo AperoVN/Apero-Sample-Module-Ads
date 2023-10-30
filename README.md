@@ -799,7 +799,7 @@ Show ad
 
 ~~~
 dependencies {
-    version = "1.10.0-snapshot14"
+    version = "1.10.0-snapshot18"
     implementation 'apero-inhouse:apero-ads:$version'
 }
 ~~~
