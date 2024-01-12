@@ -737,8 +737,8 @@ when hide app -> reopen app will be loaded forever, we will use this function in
 ### Ad open app splash 3 ( update medium )
 Set id ad
 ~~~
-  AppOpenManager.getInstance().setSplashAdId(BuildConfig.ads_open_app_high);
-  AppOpenManager.getInstance().setSplashAdId(BuildConfig.ads_open_app_medium);
+  AppOpenManager.getInstance().setAdIdAppOpen3High(BuildConfig.ads_open_app_high);
+  AppOpenManager.getInstance().setAdIdAppOpen3Medium(BuildConfig.ads_open_app_medium);
 ~~~
 Load sametime
 ~~~
